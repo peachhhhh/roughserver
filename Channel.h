@@ -10,7 +10,7 @@ class HTTPData;
 //事件分发
 //每个Channel对象都只属于某一个IO线程(一个IO线程可以有若干个Channel对象)，操作时不用加锁
 //只负责一个文件描述符的IO事件分发，但不拥有它，不负责关闭
-//生命周期由所属类管理
+//生命周期由所属类管理（wakeupchannel由EventLoop管理，acceptChannel由Server管理，其余的一般channel由HTTPData管理）
 class Channel
 {
 public:
@@ -32,20 +32,20 @@ public:
 
     int getfd() { return fd_; }
     int getEvents() { return events_; }
-    std::shared_ptr<HTTPData> getHTTPData()
-    {
-        std::shared_ptr<HTTPData> httpdataSP(httpdata_.lock());
-        return httpdataSP;
-    }
+    std::shared_ptr<HTTPData> getHTTPData();
 
     void handleEvents();
+
+    //void handleError();
+    void modEpollfdEvent(); // 更新epollfd中的事件
 
 private:
     EventLoop *eventLoop_; //所属的EventLoop对象
     const int fd_;         //文件描述符
     int events_;           //关注的事件
     int revents_;          //epoll返回的活动事件
-    int index_;            //epoll的事件数组中的序号
+    //int index_;            //epoll的事件数组中的序号
+    bool eventHandling_;
 
     std::weak_ptr<HTTPData> httpdata_; //httpdata生命周期不由channel控制，因此使用weak_ptr
 

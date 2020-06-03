@@ -30,6 +30,7 @@ void Epoller::epoll_add(ChannelSP channel, int timeout)
     {
         //LOG_SYSFATAL
         channels_[fd].reset();
+        channels_.erase(fd);
     }
 }
 
@@ -49,6 +50,7 @@ void Epoller::epoll_mod(ChannelSP channel, int timeout)
     {
         //LOG_SYSFATAL
         channels_[fd].reset();
+        channels_.erase(fd);
     }
     //}
 }
@@ -66,7 +68,9 @@ void Epoller::epoll_del(ChannelSP channel)
         //LOG_SYSFATAL  perror("epoll_del error");
     }
     channels_[fd].reset();
+    channels_.erase(fd);
     httpdatas_[fd].reset();
+    httpdatas_.erase(fd);
 }
 
 int Epoller::poll(ChannelSPVector *activeChannels)
@@ -97,13 +101,11 @@ void Epoller::getActiveChannels(int numEvents, ChannelSPVector *activeChannels)
 {
     for (int i = 0; i < numEvents; ++i)
     {
-        int fd = events_[i].data.fd; //活跃事件描述符
+        int fd = events_[i].data.fd; // 活跃事件描述符
         if (channels_[fd])
         {
-            channels_[fd]->setRevents(events_[i].events);
+            channels_[fd]->setRevents(events_[i].events); // 更新返回的活跃事件
             // channels_[fd]->setEvents(0);  ?
-            // 加入线程池之前将Timer和request分离
-            // cur_req->seperateTimer();
             activeChannels->push_back(channels_[fd]);
         }
         else
@@ -120,10 +122,10 @@ void Epoller::handleExpired()
 
 void Epoller::setTimer(ChannelSP channel, int timeout)
 {
-    std::shared_ptr<HTTPData> tmp = channel->getHTTPData();
-    if (tmp)
+    std::shared_ptr<HTTPData> tmphttp = channel->getHTTPData();
+    if (tmphttp)
     {
-        timerManager_.addTimer(tmp, timeout);
+        timerManager_.addTimer(tmphttp, timeout);
     }
     else
     {

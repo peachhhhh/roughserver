@@ -38,7 +38,7 @@ void Server::start()
     }
     acceptChannel_->setEvents(EPOLLIN | EPOLLET);
     acceptChannel_->setReadCallback(std::bind(&Server::acceptNewConn, this));
-    //acceptChannel_->setModEpollfdEventCallback(std::bind(&EventLoop::modEvent, this, acceptChannel_, 0));
+    acceptChannel_->setModEpollfdEventCallback(std::bind(&EventLoop::modEvent, this, acceptChannel_, 0));
     baseLoop_->addEvent(acceptChannel_);
 }
 
