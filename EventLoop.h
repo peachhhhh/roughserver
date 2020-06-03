@@ -25,9 +25,9 @@ public:
     void runInLoop(const std::function<void()> &cb);
     void queueInLoop(const std::function<void()> &cb);
 
-    void addEvent(ChannelSP channel, int timeout = 0) { epoller_->epoll_add(channel, timeout); }
-    void modEvent(ChannelSP channel, int timeout = 0) { epoller_->epoll_mod(channel, timeout); }
-    void delEvent(ChannelSP channel) { epoller_->epoll_del(channel); }
+    void addfd(ChannelSP channel, int timeout = 0) { epoller_->epoll_add(channel, timeout); }
+    void modfdEvent(ChannelSP channel, int timeout = 0) { epoller_->epoll_mod(channel, timeout); }
+    void delfd(ChannelSP channel) { epoller_->epoll_del(channel); }
 
     void shutDown(ChannelSP channel) { shutdown(channel->getfd(), SHUT_WR); } //shutdown关闭连接，如果输出缓冲区中还有未传输的数据，则将传递到目标主机。
 

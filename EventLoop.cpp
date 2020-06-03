@@ -30,7 +30,7 @@ EventLoop::EventLoop()
     // wakeupChannel_->setEvents(EPOLLIN | EPOLLET | EPOLLONESHOT);
     wakeupChannel_->setEvents(EPOLLIN | EPOLLET);
     wakeupChannel_->setReadCallback(std::bind(&EventLoop::handleRead, this));
-    wakeupChannel_->setModEpollfdEventCallback(std::bind(&EventLoop::modEvent, this, wakeupChannel_, 0));
+    wakeupChannel_->setModEpollfdEventCallback(std::bind(&EventLoop::modfdEvent, this, wakeupChannel_, 0));
     epoller_->epoll_add(wakeupChannel_, 0);
 }
 
