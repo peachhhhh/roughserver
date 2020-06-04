@@ -1,71 +1,74 @@
 #pragma once
 
+#include <map>
 #include <memory>
 
 class Timer;
 class Channel;
 class EventLoop;
 
-enum ProcessState
+enum GeneralState
 {
-    STATE_PARSE_URI = 1,
-    STATE_PARSE_HEADERS,
-    STATE_RECV_BODY,
-    STATE_ANALYSIS,
-    STATE_FINISH
-};
+    PARSE_REQUEST_LINE,
+    PARSE_HEADERS,
+    RECV_BODY,
+    ANALYSIS,
+    FINISH
+}; //总的状态
 
-enum URIState
+enum RequestLineState
 {
-    PARSE_URI_AGAIN = 1,
-    PARSE_URI_ERROR,
-    PARSE_URI_SUCCESS,
-};
+    PARSE_REQUESTLINE_AGAIN,
+    PARSE_REQUESTLINE_ERROR,
+    PARSE_REQUESTLINE_SUCCESS
+}; //分析请求行的状态
 
 enum HeaderState
 {
-    PARSE_HEADER_SUCCESS = 1,
     PARSE_HEADER_AGAIN,
-    PARSE_HEADER_ERROR
-};
+    PARSE_HEADER_ERROR,
+    PARSE_HEADER_SUCCESS
+}; //分析请求头的状态
+
+enum HeaderInternalState
+{
+    START,
+    KEY,
+    COLON,
+    SPACES_AFTER_COLON,
+    VALUE,
+    CR,
+    LF,
+    END_CR,
+    END_LF
+}; //分析请求头内部的状态
 
 enum AnalysisState
 {
-    ANALYSIS_SUCCESS = 1,
+    ANALYSIS_SUCCESS,
     ANALYSIS_ERROR
-};
-
-enum ParseState
-{
-    H_START = 0,
-    H_KEY,
-    H_COLON,
-    H_SPACES_AFTER_COLON,
-    H_VALUE,
-    H_CR,
-    H_LF,
-    H_END_CR,
-    H_END_LF
 };
 
 enum ConnectionState
 {
-    H_CONNECTED = 0,
-    H_DISCONNECTING,
-    H_DISCONNECTED
+    CONNECTED,
+    DISCONNECTING,
+    DISCONNECTED
 };
 
-enum HttpMethod
+enum HTTPMethod
 {
-    METHOD_POST = 1,
-    METHOD_GET,
-    METHOD_HEAD
+    UnknownMethod,
+    GET,
+    POST,
+    HEAD
 };
 
-enum HttpVersion
+enum HTTPVersion
 {
-    HTTP_10 = 1,
-    HTTP_11
+    UnknownVersion,
+    HTTP10,
+    HTTP11
 };
 
 class HTTPData
@@ -75,6 +78,7 @@ public:
     ~HTTPData();
     void newEvent();
     void closeConn();
+    void reset();
 
     std::shared_ptr<Channel> getChannel() { return channel_; }
     EventLoop *getEventLoop() { return eventLoop_; }
@@ -84,13 +88,30 @@ private:
     void handleRead();
     void handleWrite();
     void modEpollfdEventCallback();
-    //void handleError(int fd, int err_num, std::string short_msg);
+    void handleError(int fd, int err_num, std::string short_msg);
+    RequestLineState parseRequestLine(); //分析请求行
+    HeaderState parseHeaders();          //分析请求头
+    AnalysisState analysisRequest();
 
     EventLoop *eventLoop_;
     int fd_;
+    bool error_;
+    bool keepAlive_;
+    std::string fileName_;
+    std::string inBuffer_;
+    std::string outBuffer_;
+    std::map<std::string, std::string> headers_; //请求头信息存储
     std::shared_ptr<Channel> channel_;
     std::weak_ptr<Timer> timer_; //weak_ptr，只观测Timer
+
+    //int nowReadPos_;
+
     ConnectionState connectionState_;
+    GeneralState generalState_;
+    HeaderInternalState headerInternalState_;
+    HTTPMethod method_;
+    HTTPVersion version_;
+    //std::string path_;
 
     const int expiredTime = 2000;
 };

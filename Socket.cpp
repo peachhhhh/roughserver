@@ -4,10 +4,13 @@
 
 #include <unistd.h>
 #include <fcntl.h>
-#include <string.h>
+#include <string>
+#include <memory.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+
+const int MAX_BUFF = 4096;
 
 int Socket::socketBindListen(int port)
 {
@@ -31,6 +34,7 @@ int Socket::socketBindListen(int port)
     }
     return socketfd;
 }
+
 int Socket::setSocketNonBlocking(int fd)
 {
     int flag = fcntl(fd, F_GETFL, 0); //获取描述符原来的flag
@@ -45,16 +49,58 @@ int Socket::setSocketNonBlocking(int fd)
     }
     return 0;
 }
+
 void Socket::setSocketNodelay(int fd)
 {
     int enable = 1;
     setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (void *)&enable, sizeof(enable)); //禁用Nagle算法，允许小包发送，降低延时
 }
-ssize_t Socket::readfd(int fd, void *buf, size_t count)
+
+ssize_t Socket::readfd(int fd, void *buf, size_t count) //wakeupfd
 {
     return ::read(fd, buf, count);
 }
+
+ssize_t Socket::readfd(int fd, std::string &inBuffer, bool &isZero) //ET模式，读到不能再读，即遇到EAGAIN
+{
+    ssize_t hasRead = 0;
+    ssize_t readSum = 0;
+    while (true)
+    {
+        char buff[MAX_BUFF];
+        if ((hasRead = ::read(fd, buff, MAX_BUFF)) < 0)
+        {
+            if (errno == EINTR)
+            {
+                continue;
+            }
+            else if (errno == EAGAIN)
+            {
+                return readSum;
+            }
+            else
+            {
+                perror("read error");
+                return -1;
+            }
+        }
+        else if (hasRead == 0)
+        {
+            // printf("redsum = %d\n", readSum);
+            isZero = true;
+            break;
+        }
+        // printf("before inBuffer.size() = %d\n", inBuffer.size());
+        // printf("nread = %d\n", nread);
+        readSum += hasRead;
+        // buff += nread;
+        inBuffer += std::string(buff, buff + hasRead);
+        // printf("after inBuffer.size() = %d\n", inBuffer.size());
+    }
+    return readSum;
+}
+
 ssize_t Socket::writefd(int fd, const void *buf, size_t count)
 {
-  return ::write(fd, buf, count);
+    return ::write(fd, buf, count);
 }
