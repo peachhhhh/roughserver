@@ -31,7 +31,7 @@ public:
     void setHTTPData(std::shared_ptr<HTTPData> httpdata) { httpdata_ = httpdata; }
 
     int getfd() { return fd_; }
-    int getEvents() { return events_; }
+    unsigned int &getEvents() { return events_; }
     std::shared_ptr<HTTPData> getHTTPData();
 
     void handleEvents();
@@ -42,8 +42,8 @@ public:
 private:
     EventLoop *eventLoop_; //所属的EventLoop对象
     const int fd_;         //文件描述符
-    int events_;           //关注的事件
-    int revents_;          //epoll返回的活动事件
+    unsigned int events_;           //关注的事件
+    unsigned int revents_;          //epoll返回的活动事件
     //int index_;            //epoll的事件数组中的序号
     bool eventHandling_;
 

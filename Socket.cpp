@@ -100,7 +100,49 @@ ssize_t Socket::readfd(int fd, std::string &inBuffer, bool &isZero) //ET模式�
     return readSum;
 }
 
-ssize_t Socket::writefd(int fd, const void *buf, size_t count)
+ssize_t Socket::writefd(int fd, const void *buf, size_t count) //wakeupfd
 {
     return ::write(fd, buf, count);
+}
+
+ssize_t writefd(int fd, std::string &outBuffer)
+{
+    size_t length = outBuffer.size();
+    ssize_t hasWritten = 0;
+    ssize_t writeSum = 0;
+    const char *ptr = outBuffer.c_str();
+    while (length > 0)
+    {
+        if ((hasWritten = ::write(fd, ptr, length)) <= 0)
+        {
+            if (hasWritten < 0)
+            {
+                if (errno == EINTR) //中断错误
+                {
+                    hasWritten = 0;
+                    continue;
+                }
+                else if (errno == EAGAIN) //发送缓冲区被填满
+                {
+                    break;
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+        }
+        writeSum += hasWritten;
+        length -= hasWritten;
+        ptr += hasWritten;
+    }
+    if (writeSum == static_cast<int>(outBuffer.size()))
+    {
+        outBuffer.clear();
+    }
+    else
+    {
+        outBuffer = outBuffer.substr(writeSum); //从writeSum开始截取
+    }
+    return writeSum;
 }

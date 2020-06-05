@@ -20,7 +20,7 @@ public:
     //Timer(Timer &timer);
     //void update(int timeout);
     bool isUnexpired();
-    void clearHTTP();
+    void resetHTTPSP();
 
     void setDeleted() { deleted_ = true; }
     bool isDeleted() const { return deleted_; }

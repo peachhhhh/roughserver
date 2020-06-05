@@ -43,9 +43,9 @@ bool Timer::isUnexpired()
     }
 }
 
-void Timer::clearHTTP()
+void Timer::resetHTTPSP()
 {
-    httpdata_.reset();
+    httpdata_.reset(); //shared_ptr重置
     this->setDeleted();
 }
 

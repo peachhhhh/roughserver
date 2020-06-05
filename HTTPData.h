@@ -71,7 +71,24 @@ enum HTTPVersion
     HTTP11
 };
 
-class HTTPData
+const static std::map<std::string, std::string> mimetype = {
+    {"default", "text/html"},
+    {".avi", "video/x-msvideo"},
+    {".bmp", "image/bmp"},
+    {".c", "text/plain"},
+    {".cpp", "text/plain"},
+    {".doc", "application/msword"},
+    {".gif", "image/gif"},
+    {".gz", "application/x-gzip"},
+    {".htm", "text/html"},
+    {".html", "text/html"},
+    {".ico", "image/x-icon"},
+    {".jpg", "image/jpeg"},
+    {".mp3", "audio/mp3"},
+    {".png", "image/png"},
+    {".txt", "text/plain"}};
+
+class HTTPData : public std::enable_shared_from_this<HTTPData>
 {
 public:
     HTTPData(EventLoop *eventLoop, int fd);
@@ -79,6 +96,7 @@ public:
     void newEvent();
     void closeConn();
     void reset();
+    void resetTimer();
 
     std::shared_ptr<Channel> getChannel() { return channel_; }
     EventLoop *getEventLoop() { return eventLoop_; }
@@ -104,8 +122,6 @@ private:
     std::shared_ptr<Channel> channel_;
     std::weak_ptr<Timer> timer_; //weak_ptr，只观测Timer
 
-    //int nowReadPos_;
-
     ConnectionState connectionState_;
     GeneralState generalState_;
     HeaderInternalState headerInternalState_;
@@ -114,4 +130,5 @@ private:
     //std::string path_;
 
     const int expiredTime = 2000;
+    const int keepAliveTime = 5 * 60 * 1000;
 };
