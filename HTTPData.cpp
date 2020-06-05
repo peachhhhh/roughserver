@@ -534,7 +534,7 @@ AnalysisState HTTPData::handleRequest()
         if (fileName_ == "hello")
         {
             outBuffer_ =
-                "HTTP/1.1 200 OK\r\nContent-type: text/plain\r\n\r\nHello World";
+                "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello World";
             return ANALYSIS_SUCCESS;
         }
 
@@ -547,7 +547,7 @@ AnalysisState HTTPData::handleRequest()
         }
         header += "Content-Type: " + filetype + "\r\n";
         header += "Content-Length: " + std::to_string(statbuf.st_size) + "\r\n";
-        header += "Server: LinYa's Web Server\r\n";
+        header += "Server: roughserver\r\n";
         // 头部结束
         header += "\r\n";
         outBuffer_ += header;

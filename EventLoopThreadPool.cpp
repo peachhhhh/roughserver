@@ -24,9 +24,9 @@ void EventLoopThreadPool::start()
     start_ = true;
     for (int i = 0; i < numThreads_; ++i)
     {
-        std::unique_ptr<EventLoopThread> t(new EventLoopThread()); //创建 EventLoopThread 对象
-        threads_.push_back(std::move(t));                          // threads_ 内存储所有 EventLoopThread 对象的智能指针，实现自动销毁
-        eventLoops_.push_back(t->startLoop());                     //在 EventLoopThread 对象内创建每个线程，并各自运行线程函数
+        EventLoopThread *t = new EventLoopThread();              //创建 EventLoopThread 对象
+        threads_.push_back(std::unique_ptr<EventLoopThread>(t)); // threads_ 内存储所有 EventLoopThread 对象的智能指针，实现自动销毁
+        eventLoops_.push_back(t->startLoop());                   //在 EventLoopThread 对象内创建每个线程，并各自运行线程函数
     }
 }
 

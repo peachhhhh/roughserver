@@ -7,17 +7,17 @@ LIBS    := -lpthread
 CFLAGS  := -std=c++11 -g -Wall -O3
 CXXFLAGS:= $(CFLAGS)
 
+$(TARGET) : $(OBJS) Main.o
+	$(CC) $(CXXFLAGS) -o $@ $^ $(LIBS)
+
 .PHONY : objs clean veryclean rebuild debug
 objs : $(OBJS)
-rebuild: veryclean
+rebuild : veryclean
 
 clean :
 	find . -name '*.o' | xargs rm -f
-veryclean :
-	find . -name '*.o' | xargs rm -f
+targetclean :
 	find . -name $(TARGET) | xargs rm -f
-debug:
+veryclean : clean targetclean
+debug :
 	@echo $(SOURCE)
-
-$(TARGET) : $(OBJS) Main.o
-	$(CC) $(CXXFLAGS) -o $@ $^ $(LIBS)
