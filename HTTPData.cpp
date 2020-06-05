@@ -181,7 +181,7 @@ void HTTPData::handleRead()
         }
         if (generalState_ == ANALYSIS)
         {
-            AnalysisState flag = this->analysisRequest();
+            AnalysisState flag = this->handleRequest();
             if (flag == ANALYSIS_SUCCESS)
             {
                 generalState_ = FINISH;
@@ -504,34 +504,12 @@ HeaderState HTTPData::parseHeaders()
     return PARSE_HEADER_AGAIN;
 }
 
-AnalysisState HTTPData::analysisRequest()
+AnalysisState HTTPData::handleRequest()
 {
     if (method_ == POST)
     {
-        // ------------------------------------------------------
-        // My CV stitching handler which requires OpenCV library
-        // ------------------------------------------------------
-        // string header;
-        // header += string("HTTP/1.1 200 OK\r\n");
-        // if(headers_.find("Connection") != headers_.end() &&
-        // headers_["Connection"] == "Keep-Alive")
-        // {
-        //     keepAlive_ = true;
-        //     header += string("Connection: Keep-Alive\r\n") + "Keep-Alive:
-        //     timeout=" + to_string(DEFAULT_KEEP_ALIVE_TIME) + "\r\n";
-        // }
-        // int length = stoi(headers_["Content-length"]);
-        // vector<char> data(inBuffer_.begin(), inBuffer_.begin() + length);
-        // Mat src = imdecode(data, CV_LOAD_IMAGE_ANYDEPTH|CV_LOAD_IMAGE_ANYCOLOR);
-        // //imwrite("receive.bmp", src);
-        // Mat res = stitch(src);
-        // vector<uchar> data_encode;
-        // imencode(".png", res, data_encode);
-        // header += string("Content-length: ") + to_string(data_encode.size()) +
-        // "\r\n\r\n";
-        // outBuffer_ += header + string(data_encode.begin(), data_encode.end());
-        // inBuffer_ = inBuffer_.substr(length);
-        // return ANALYSIS_SUCCESS;
+        handleError(fd_, 501, "POST is not implemented");
+        return ANALYSIS_ERROR;
     }
     else if (method_ == GET || method_ == HEAD)
     {
@@ -614,7 +592,7 @@ void HTTPData::handleError(int fd, int err_num, std::string short_msg)
     header_buff += "Server: roughserver\r\n";
     header_buff += "\r\n";
 
-    body_buff += "<html><title>哎~出错了</title>";
+    body_buff += "<html><title>出错了</title>";
     body_buff += "<body bgcolor=\"ffffff\">";
     body_buff += std::to_string(err_num) + short_msg;
     body_buff += "<hr><em> roughserver</em>\n</body></html>";

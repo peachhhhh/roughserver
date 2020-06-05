@@ -109,7 +109,7 @@ private:
     void handleError(int fd, int err_num, std::string short_msg);
     RequestLineState parseRequestLine(); //分析请求行
     HeaderState parseHeaders();          //分析请求头
-    AnalysisState analysisRequest();
+    AnalysisState handleRequest();
 
     EventLoop *eventLoop_;
     int fd_;
