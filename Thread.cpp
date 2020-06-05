@@ -32,11 +32,17 @@ namespace CurrentThread
         }
     }
 
-    ThreadNameInitializer::ThreadNameInitializer() //此处与muduo相比，没有考虑fork()
+    class ThreadNameInitializer
     {
-        CurrentThread::t_threadName = "main";
-        CurrentThread::tid();
-    }
+    public:
+        ThreadNameInitializer() // 未考虑fork()
+        {
+            CurrentThread::t_threadName = "main";
+            CurrentThread::tid();
+        }
+    };
+
+    ThreadNameInitializer init; //用于主进程初始化命名空间CurrentThread内的各个变量，先于main函数初始化
 
     struct ThreadData
     {

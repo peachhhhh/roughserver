@@ -1,8 +1,5 @@
-#pragma once
-
 #include "Socket.h"
 
-#include <unistd.h>
 #include <fcntl.h>
 #include <string>
 #include <memory.h>
@@ -105,7 +102,7 @@ ssize_t Socket::writefd(int fd, const void *buf, size_t count) //wakeupfd
     return ::write(fd, buf, count);
 }
 
-ssize_t writefd(int fd, std::string &outBuffer)
+ssize_t Socket::writefd(int fd, std::string &outBuffer)
 {
     size_t length = outBuffer.size();
     ssize_t hasWritten = 0;

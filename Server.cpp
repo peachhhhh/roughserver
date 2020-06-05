@@ -38,8 +38,8 @@ void Server::start()
     }
     acceptChannel_->setEvents(EPOLLIN | EPOLLET);
     acceptChannel_->setReadCallback(std::bind(&Server::acceptNewConn, this));
-    acceptChannel_->setModEpollfdEventCallback(std::bind(&EventLoop::modEvent, this, acceptChannel_, 0));
-    baseLoop_->addEvent(acceptChannel_);
+    acceptChannel_->setModEpollfdEventCallback(std::bind(&Server::modEpollfdEvent, this));
+    baseLoop_->addfd(acceptChannel_);
 }
 
 void Server::acceptNewConn()
@@ -48,7 +48,7 @@ void Server::acceptNewConn()
     memset(&clientAddr, 0, sizeof(struct sockaddr_in));
     socklen_t clientAddrLen = sizeof(clientAddr);
     int acceptfd = 0;
-    while (acceptfd = ::accept(listenfd_, (struct sockaddr *)&clientAddr, &clientAddrLen) > 0) //由于是ET模式，需要读完为止，故使用while
+    while ((acceptfd = ::accept(listenfd_, (struct sockaddr *)&clientAddr, &clientAddrLen)) > 0) //由于是ET模式，需要读完为止，故使用while
     {
         EventLoop *eventLoop = eventLoopThreadPool_->getNextLoop();
         //LOG

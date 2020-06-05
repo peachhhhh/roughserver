@@ -34,13 +34,5 @@ namespace CurrentThread
         return t_threadName;
     }
 
-    class ThreadNameInitializer
-    {
-    public:
-        ThreadNameInitializer();
-    };
-
-    ThreadNameInitializer init; //用于进程初始化命名空间CurrentThread内的各个变量
-
     void *startThread(void *obj); //子线程运行函数
 } // namespace CurrentThread

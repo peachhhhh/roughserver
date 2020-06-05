@@ -1,13 +1,13 @@
 #pragma once
 
 #include "noncopyable.h"
+#include "EventLoop.h"
 
 #include <map>
 #include <string.h>
 #include <memory>
 
 class Channel;
-class EventLoop;
 class EventLoopThreadPool;
 
 class Server : noncopyable
@@ -18,7 +18,7 @@ public:
     EventLoop *getBaseLoop() const { return baseLoop_; }
     void start();
     void acceptNewConn();
-    void handleCurConn() { baseLoop_->modChannel(acceptChannel_); }
+    void modEpollfdEvent() { baseLoop_->modfdEvent(acceptChannel_); }
 
 private:
     bool start_;

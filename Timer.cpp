@@ -12,7 +12,7 @@ Timer::Timer(std::shared_ptr<HTTPData> requestData, int timeout)
 Timer::~Timer()
 {
     if (httpdata_)
-        httpdata_->handleClose();
+        httpdata_->closeConn();
 }
 
 /*

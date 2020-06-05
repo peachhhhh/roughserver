@@ -15,7 +15,7 @@ public:
     typedef std::function<void(EventLoop *)> ThreadInitCallback;
 
     EventLoopThreadPool(EventLoop *baseLoop, int numThreads);
-    ~EventLoopThreadPool() = default;
+    ~EventLoopThreadPool();
 
     void start();
     EventLoop *getNextLoop();
