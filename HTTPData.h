@@ -102,11 +102,12 @@ public:
     EventLoop *getEventLoop() { return eventLoop_; }
     void setTimer(std::shared_ptr<Timer> timer) { timer_ = timer; }
 
+    void handleError(int fd, int err_num, std::string short_msg);
+    
 private:
     void handleRead();
     void handleWrite();
     void modEpollfdEventCallback();
-    void handleError(int fd, int err_num, std::string short_msg);
     RequestLineState parseRequestLine(); //分析请求行
     HeaderState parseHeaders();          //分析请求头
     AnalysisState handleRequest();
