@@ -2,3 +2,6 @@ tmp/
 *.o
 roughserver
 core*
+
+CMakeLists.txt
+build.sh
