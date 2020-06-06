@@ -7,7 +7,7 @@
 int main(int argc, char *argv[])
 {
     int threadNum = 4;
-    int port = 80;
+    int port = 4000;
     // parse args
     int opt;
     while ((opt = getopt(argc, argv, "t:p:")) != -1)

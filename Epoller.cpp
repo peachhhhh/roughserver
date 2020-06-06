@@ -41,8 +41,7 @@ void Epoller::epoll_mod(ChannelSP channel, int timeout)
         setTimer(channel, timeout);
     }
     int fd = channel->getfd();
-    //if (!channel->EqualAndUpdateLastEvents())
-    //{
+    
     struct epoll_event event;
     event.data.fd = fd;
     event.events = channel->getEvents();
@@ -52,7 +51,7 @@ void Epoller::epoll_mod(ChannelSP channel, int timeout)
         channels_[fd].reset();
         channels_.erase(fd);
     }
-    //}
+    
 }
 
 void Epoller::epoll_del(ChannelSP channel)
@@ -62,10 +61,9 @@ void Epoller::epoll_del(ChannelSP channel)
     event.data.fd = fd;
     event.events = channel->getEvents();
     // event.events = 0;
-    // request->EqualAndUpdateLastEvents()
     if (epoll_ctl(epollfd_, EPOLL_CTL_DEL, fd, &event) < 0)
     {
-        //LOG_SYSFATAL  perror("epoll_del error");
+        //LOG_SYSFATAL ;
     }
     channels_[fd].reset();
     channels_.erase(fd);

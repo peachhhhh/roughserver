@@ -51,9 +51,9 @@ enum AnalysisState
 
 enum ConnectionState
 {
-    CONNECTED,
-    DISCONNECTING,
-    DISCONNECTED
+    CONNECTED,     //连接的
+    DISCONNECTING, //正在断开
+    DISCONNECTED   //已经断开
 };
 
 enum HTTPMethod
@@ -103,7 +103,7 @@ public:
     void setTimer(std::shared_ptr<Timer> timer) { timer_ = timer; }
 
     void handleError(int fd, int err_num, std::string short_msg);
-    
+
 private:
     void handleRead();
     void handleWrite();

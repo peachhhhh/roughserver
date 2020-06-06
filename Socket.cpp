@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <iostream>
 
 const int MAX_BUFF = 4096;
 
@@ -60,6 +61,7 @@ ssize_t Socket::readfd(int fd, void *buf, size_t count) //wakeupfd
 
 ssize_t Socket::readfd(int fd, std::string &inBuffer, bool &isZero) //ET模式，读到不能再读，即遇到EAGAIN
 {
+    //std::cout << "readfd: " << inBuffer <<"\n";
     ssize_t hasRead = 0;
     ssize_t readSum = 0;
     while (true)
@@ -104,6 +106,7 @@ ssize_t Socket::writefd(int fd, const void *buf, size_t count) //wakeupfd
 
 ssize_t Socket::writefd(int fd, std::string &outBuffer)
 {
+    //std::cout << outBuffer << "\n";
     size_t length = outBuffer.size();
     ssize_t hasWritten = 0;
     ssize_t writeSum = 0;
@@ -141,5 +144,6 @@ ssize_t Socket::writefd(int fd, std::string &outBuffer)
     {
         outBuffer = outBuffer.substr(writeSum); //从writeSum开始截取
     }
+    //std::cout << outBuffer << "\n";
     return writeSum;
 }

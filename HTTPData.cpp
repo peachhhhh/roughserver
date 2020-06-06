@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+#include <iostream>
 
 std::string findMimeType(const std::string &suffix)
 {
@@ -119,11 +120,12 @@ void HTTPData::handleRead()
                 // error_ = true;
                 break;
             }
-            // cout << "readnum == 0" << endl;
+            //std::cout << "readnum == 0\n";
         }
 
         if (generalState_ == PARSE_REQUEST_LINE)
         {
+            //std::cout << "parseRequestLine\n";
             RequestLineState flag = this->parseRequestLine();
             if (flag == PARSE_REQUESTLINE_AGAIN)
                 break;
@@ -141,6 +143,7 @@ void HTTPData::handleRead()
         }
         if (generalState_ == PARSE_HEADERS)
         {
+            //std::cout << "parseHeaders\n";
             HeaderState flag = this->parseHeaders();
             if (flag == PARSE_HEADER_AGAIN)
                 break;
@@ -182,6 +185,7 @@ void HTTPData::handleRead()
         }
         if (generalState_ == ANALYSIS)
         {
+            //std::cout << "handleRequest\n";
             AnalysisState flag = this->handleRequest();
             if (flag == ANALYSIS_SUCCESS)
             {
@@ -196,7 +200,7 @@ void HTTPData::handleRead()
             }
         }
     } while (false);
-    // cout << "state_=" << state_ << endl;
+    //std::cout << "state_=" << generalState_ << std::endl;
     if (!error_)
     {
         if (outBuffer_.size() > 0)
@@ -210,6 +214,7 @@ void HTTPData::handleRead()
             this->reset();
             if (inBuffer_.size() > 0)
             {
+                //std::cout << "handleRead\n";
                 if (connectionState_ != DISCONNECTING)
                     handleRead();
             }
@@ -259,7 +264,7 @@ void HTTPData::modEpollfdEventCallback()
                 timeout = keepAliveTime;
             if ((events_ & EPOLLIN) && (events_ & EPOLLOUT))
             {
-                events_ = __uint32_t(0);
+                events_ = (unsigned int)(0);
                 events_ |= EPOLLOUT;
             }
             // events_ |= (EPOLLET | EPOLLONESHOT);
@@ -287,10 +292,12 @@ void HTTPData::modEpollfdEventCallback()
     else if (!error_ && connectionState_ == DISCONNECTING && (events_ & EPOLLOUT))
     {
         events_ = (EPOLLOUT | EPOLLET);
+        //eventLoop_->modfdEvent(channel_, expiredTime);
     }
     else
     {
-        // cout << "close with errors" << endl;
+        //events_ |= (EPOLLOUT | EPOLLET);
+        //eventLoop_->modfdEvent(channel_, expiredTime);
         eventLoop_->runInLoop(std::bind(&HTTPData::closeConn, shared_from_this()));
     }
 }
@@ -304,7 +311,6 @@ RequestLineState HTTPData::parseRequestLine() //解析请求行
     {
         return PARSE_REQUESTLINE_AGAIN;
     }
-    // 去掉请求行所占的空间，节省空间
     std::string request_line = str.substr(0, pos);
     if (str.size() > pos + 1)
         str = str.substr(pos + 1);
@@ -534,14 +540,14 @@ AnalysisState HTTPData::handleRequest()
         // echo test
         if (fileName_ == "hello")
         {
-            outBuffer_ =
-                "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello World";
+            outBuffer_ = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello World";
             return ANALYSIS_SUCCESS;
         }
 
         struct stat statbuf; //文件属性
         if (::stat(fileName_.c_str(), &statbuf) < 0)
         {
+            //std::cout << "no file found\n";
             header.clear();
             handleError(fd_, 404, "Not Found!");
             return ANALYSIS_ERROR;
@@ -549,7 +555,6 @@ AnalysisState HTTPData::handleRequest()
         header += "Content-Type: " + filetype + "\r\n";
         header += "Content-Length: " + std::to_string(statbuf.st_size) + "\r\n";
         header += "Server: roughserver\r\n";
-        // 头部结束
         header += "\r\n";
         outBuffer_ += header;
 
@@ -583,11 +588,12 @@ AnalysisState HTTPData::handleRequest()
 
 void HTTPData::handleError(int fd, int err_num, std::string short_msg)
 {
+    //std::cout << "start to handle error\n";
     short_msg = " " + short_msg;
     std::string body_buff, header_buff;
 
     header_buff += "HTTP/1.1 " + std::to_string(err_num) + short_msg + "\r\n";
-    header_buff += "Content-Type: text/html\r\n";
+    header_buff += "Content-Type: text/plain\r\n";
     header_buff += "Connection: Close\r\n";
     header_buff += "Content-Length: " + std::to_string(body_buff.size()) + "\r\n";
     header_buff += "Server: roughserver\r\n";
@@ -600,4 +606,6 @@ void HTTPData::handleError(int fd, int err_num, std::string short_msg)
 
     Socket::writefd(fd, header_buff);
     Socket::writefd(fd, body_buff);
+
+    //std::cout << "handleError is completed\n";
 }
