@@ -34,7 +34,7 @@ HTTPData::HTTPData(EventLoop *eventLoop, int fd)
       method_(GET),
       version_(HTTP11)
 {
-    channel_->setEvents(EPOLLIN | EPOLLET | EPOLLONESHOT); // EPOLLONESHOT，只触发一次，触发以后，要重新加入epoll，从而保证只在一个线程中触发
+    //channel_->setEvents(EPOLLIN | EPOLLET | EPOLLONESHOT);
     channel_->setReadCallback(std::bind(&HTTPData::handleRead, this));
     channel_->setWriteCallback(std::bind(&HTTPData::handleWrite, this));
     //channel_->setErrorCallback(std::bind(&HTTPData::handleError, this));
@@ -95,7 +95,7 @@ void HTTPData::handleRead()
             inBuffer_.clear();
             break;
         }
-        // cout << inBuffer_ << endl;
+        //std::cout << readSum << "\n" << inBuffer_ << std::endl;
         if (readSum < 0)
         {
             perror("1");

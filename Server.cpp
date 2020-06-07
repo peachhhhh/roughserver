@@ -5,6 +5,8 @@
 #include "EventLoop.h"
 #include "EventLoopThreadPool.h"
 
+#include <errno.h>
+#include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
 #include <netinet/in.h>
@@ -16,7 +18,8 @@ Server::Server(EventLoop *baseLoop, int numThread, int port)
       port_(port),
       eventLoopThreadPool_(new EventLoopThreadPool(baseLoop, numThread)),
       listenfd_(Socket::socketBindListen(port)),
-      acceptChannel_(new Channel(baseLoop, listenfd_))
+      acceptChannel_(new Channel(baseLoop, listenfd_)),
+      nullfd_(::open("/dev/null", O_RDONLY | O_CLOEXEC))
 {
     //handle_for_sigpipe();
     if (Socket::setSocketNonBlocking(listenfd_) < 0)
@@ -27,7 +30,10 @@ Server::Server(EventLoop *baseLoop, int numThread, int port)
     }
 }
 
-Server::~Server() {}
+Server::~Server()
+{
+    ::close(nullfd_);
+}
 
 void Server::start()
 {
@@ -52,7 +58,7 @@ void Server::acceptNewConn()
     {
         EventLoop *eventLoop = eventLoopThreadPool_->getNextLoop();
         //LOG
-        if (acceptfd >= 10000)
+        if (acceptfd >= 100000)
         {
             //FIXME 更改为保留一个空的描述符，防止socket描述符过多
             close(acceptfd);

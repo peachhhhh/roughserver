@@ -29,5 +29,7 @@ private:
 
     int listenfd_;
     std::shared_ptr<Channel> acceptChannel_;
+
+    int nullfd_;
     //static const int MAXFDS = 100000;
 };
